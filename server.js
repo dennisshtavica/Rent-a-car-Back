@@ -36,8 +36,6 @@ db.sequelize.sync()
 
 const mongodbConn = require("./db/mongodb");
 
-
-
 mongodbConn
   .once("open", () => {
     console.log("MongoDB connection has been established successfully.");
@@ -45,6 +43,9 @@ mongodbConn
   .on("error", (error) => {
     console.error("MongoDB connection error:", error);
   });
+
+  
+require("./routes/userRoutes")(app)
 
 
 app.get("/", (req, res) => {
