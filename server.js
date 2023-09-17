@@ -23,6 +23,8 @@ app.use(
   })
 );
 
+app.use("/uploads", express.static("uploads"));
+
 const db = require('./models/mysql');
 
 db.sequelize.sync()
@@ -46,6 +48,7 @@ mongodbConn
 
   
 require("./routes/userRoutes")(app)
+require("./routes/carRoutes")(app)
 
 
 app.get("/", (req, res) => {
@@ -53,6 +56,10 @@ app.get("/", (req, res) => {
 });
   
 
-app.listen(app.get("port"), () => {
-  console.log(`Server running at http://localhost:${app.get("port")}`);
+// app.listen(app.get("port"), () => {
+//   console.log(`Server running at http://localhost:${app.get("port")}`);
+// });
+
+app.listen(app.get("port"), "0.0.0.0", () => {
+  console.log(`Server running at http://0.0.0.0:${app.get("port")}`);
 });
