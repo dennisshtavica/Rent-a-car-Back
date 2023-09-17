@@ -16,7 +16,7 @@ const Cars = mongoose.Schema({
         type: Number,
         required: true,
     },
-    transimission: {
+    transmission: {
         type: String,
         required: true,
     },
@@ -33,4 +33,4 @@ const Cars = mongoose.Schema({
     },
 })
 
-module.exports = mongoose.model("Cars", Cars)
+module.exports = mongoose.model("Cars", Cars, 'cars')
