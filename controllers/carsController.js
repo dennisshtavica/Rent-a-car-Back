@@ -45,3 +45,17 @@ exports.getCars = (req, res, next) => {
             console.log('Err', err);
         })
 }
+
+
+exports.searchCars = async (req, res) => {
+  try {
+    const { carBrand, carModel } = req.params;
+
+    const searchResults = await Cars.find({ name: carBrand, model: carModel });
+
+    res.status(200).json({ results: searchResults });
+  } catch (error) {
+    console.error('Error searching cars:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
