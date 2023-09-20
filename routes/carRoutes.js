@@ -16,6 +16,7 @@ module.exports = (app) => {
     router.post("/addCar", multerMiddleware.upload.single("image") ,carsController.addCar)
     router.delete("/deleteCars", carsController.deleteCars)
     router.get("/getCars", carsController.getCars)
+    router.get("/search-results/:carBrand/:carModel", carsController.searchCars)
 
     app.use(router);
   };
