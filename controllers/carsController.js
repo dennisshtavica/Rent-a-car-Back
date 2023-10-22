@@ -27,25 +27,24 @@ exports.addCar = async (req, res) => {
 exports.deleteCars = (req, res, next) => {
   Cars.deleteMany({})
     .then(() => {
-        console.log('Deleted cars');
-        next()
+      console.log("Deleted cars");
+      next();
     })
     .catch((err) => {
-        console.log('Err', err);
-    })
+      console.log("Err", err);
+    });
 };
 
 exports.getCars = (req, res, next) => {
-    Cars.find({})
-        .then((cars) => {
-            res.status(200).send(cars)
-            next()
-        })
-        .catch((err) => {
-            console.log('Err', err);
-        })
-}
-
+  Cars.find({})
+    .then((cars) => {
+      res.status(200).send(cars);
+      next();
+    })
+    .catch((err) => {
+      console.log("Err", err);
+    });
+};
 
 exports.searchCars = async (req, res) => {
   try {
@@ -55,7 +54,20 @@ exports.searchCars = async (req, res) => {
 
     res.status(200).json({ results: searchResults });
   } catch (error) {
-    console.error('Error searching cars:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error searching cars:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};
+
+exports.getOneCar = (req, res) => {
+  let carId = req.params.id;
+
+  Cars.findById(carId).then((car) => {
+    console.log(car);
+    res.status(200).json(car);
+  })
+  .catch((err) => {
+    console.log('Err', err);
+  })
+};
+

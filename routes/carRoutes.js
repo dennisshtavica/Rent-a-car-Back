@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const carsController = require("../controllers/carsController")
+const bookingsController = require('../controllers/bookingsController')
 const { authJwt, multerMiddleware } = require("../middlewares/index");
 
 
@@ -17,6 +18,9 @@ module.exports = (app) => {
     router.delete("/deleteCars", carsController.deleteCars)
     router.get("/getCars", carsController.getCars)
     router.get("/search-results/:carBrand/:carModel", carsController.searchCars)
+    router.get("/bookingPage/:id", carsController.getOneCar)
+    router.post('/bookings', bookingsController.addBooking)
+    router.get('/bookings/:id', bookingsController.getBookedCar)
 
     app.use(router);
   };
