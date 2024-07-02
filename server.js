@@ -9,6 +9,7 @@ const corsOptions = {
   credentials: true,
 };
 
+
 app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
@@ -38,13 +39,13 @@ db.sequelize.sync()
 
 const mongodbConn = require("./db/mongodb");
 
-mongodbConn
-  .once("open", () => {
-    console.log("MongoDB connection has been established successfully.");
-  })
-  .on("error", (error) => {
-    console.error("MongoDB connection error:", error);
-  });
+// mongodbConn
+//   .once("open", () => {
+//     console.log("MongoDB connection has been established successfully.");
+//   })
+//   .on("error", (error) => {
+//     console.error("MongoDB connection error:", error);
+//   });
 
   
 require("./routes/userRoutes")(app)
