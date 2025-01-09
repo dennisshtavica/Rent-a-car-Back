@@ -31,6 +31,23 @@ const Cars = mongoose.Schema({
         type: Number,
         required: true
     },
+    year: {
+        type: Number,          
+        required: true         
+    },
+    available: {
+        type: Boolean,           
+        default: true            
+    },
+    car_features: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CarFeature'        
+    }],
+    car_category: {
+        type: mongoose.Schema.Types.ObjectId,   
+        ref: 'CarCategory',
+        required: true
+    }
 })
 
 module.exports = mongoose.model("Cars", Cars, 'cars')

@@ -2,6 +2,7 @@ const db = require("../models/mysql");
 const jwt = require("jsonwebtoken");
 const User = db.users;
 const bcrypt = require("bcrypt");
+const { sequelize } = require("../models/mysql");
 
 
 exports.signup = async (req, res) => {
@@ -53,43 +54,113 @@ exports.signup = async (req, res) => {
   console.log(token);
 };
 
-exports.login = (req, res, next) => {
-  User.findOne({
-    where: { email: req.body.email },
-  })
-    .then((user) => {
-      if (user) {
-        user.passwordComparison(req.body.password).then((passwordMatch) => {
-          if (passwordMatch) {
-            console.log(`Success ${user.name}`);
-            const payload = { id: user.id };
-            const token = jwt.sign(payload, "mySecretKey", {
-              expiresIn: "24h",
-            });
-            req.user = user;
-            res
-              .status(200)
-              .json({
-                message: "ok",
-                token,
-                username: user.username,
-                email: user.email,
-                id: user.id,
-              });
-          } else {
-            console.log("Error");
-            res.status(401).json({ message: "Invalid credentials" });
-          }
-          next();
-        });
-      } else {
-        next();
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      next(error);
+// exports.login = (req, res, next) => {
+//   User.findOne({
+//     where: { email: req.body.email },
+//   })
+//     .then((user) => {
+//       if (user) {
+//         user.passwordComparison(req.body.password).then((passwordMatch) => {
+//           if (passwordMatch) {
+//             console.log(`Success ${user.name}`);
+//             const payload = { id: user.id };
+//             const token = jwt.sign(payload, "mySecretKey", {
+//               expiresIn: "24h",
+//             });
+//             req.user = user;
+//             res
+//               .status(200)
+//               .json({
+//                 message: "ok",
+//                 token,
+//                 username: user.username,
+//                 email: user.email,
+//                 id: user.id,
+//                 role_id: user.role_id,
+//               });
+//           } else {
+//             console.log("Error");
+//             res.status(401).json({ message: "Invalid credentials" });
+//           }
+//           next();
+//         });
+//       } else {
+//         next();
+//       }
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//       next(error);
+//     });
+// };
+
+exports.login = async (req, res, next) => {
+  try {
+    const user = await User.findOne({
+      where: { email: req.body.email },
     });
+
+    // const jwtSecret = process.env.SECRET_KEY ;
+
+    if (!req.body.email) {
+      res.status(400).json({ message: "Email is required" });
+    }
+    if(!req.body.password) {
+      res.status(400).json({ message: "Password is required" });
+    }
+
+
+    if (user) {
+      const passwordMatch = await user.passwordComparison(req.body.password);
+
+      if (passwordMatch) {
+        const query = `
+          SELECT users.*, roles.name AS role_name
+          FROM users
+          LEFT JOIN roles ON users.role_id = roles.id
+          WHERE users.email = :email;
+        `;
+
+        const [result] = await sequelize.query(query, {
+          replacements: { email: req.body.email },
+          type: sequelize.QueryTypes.SELECT,
+        });
+
+        if (result) {
+          const payload = {
+            id: result.id,
+            role_id: result.role_id,
+            role_name: result.role_name,
+          };
+
+          const token = jwt.sign(payload, "mySecretKey", {
+            expiresIn: "24h",
+          });
+
+          req.user = user;
+          res.status(200).json({
+            message: "ok",
+            token,
+            role_id: result.role_id,
+            username: user.username,
+            email: user.email,
+            id: user.id,
+          });
+        } else {
+          console.log("Error fetching user and role information");
+        }
+      } else {
+        console.log("Error");
+        res.status(401).json({ message: "Invalid credentials" });
+      }
+    } else {
+      next();
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 };
 
 

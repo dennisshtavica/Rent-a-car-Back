@@ -10,14 +10,20 @@ const Bookings = mongoose.Schema({
         type: String,
         required: true,
     },
-    pickupDate: {
+    returnLocation: {
+        type: String,         
+        required: true        
+    },
+    rentalDate: {
         type: Date,
         required: true,
     },
-    returnDate: {
-        type: Date,
-        required: true,
-    },
+    booking_status: {
+        type: String,         
+        enum: ['pending', 'confirmed', 'cancelled', 'completed'], 
+        default: 'pending',   
+        required: true        
+    }
 })
 
 module.exports = mongoose.model("Bookings", Bookings, 'bookings')
