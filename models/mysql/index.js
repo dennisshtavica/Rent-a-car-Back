@@ -17,9 +17,11 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.users = require("./user")(sequelize, DataTypes);
+db.roles = require("./roles")(sequelize, DataTypes);
 db.magazine = require("./magazine")(sequelize, DataTypes);
 db.publisher = require("./publisher")(sequelize, DataTypes);
 
 db.magazine.belongsTo(db.publisher, { foreignKey: "PublisherID" })
+db.users.belongsTo(db.roles, { foreignKey: "role_id" });
 
 module.exports = db;

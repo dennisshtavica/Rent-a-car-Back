@@ -10,9 +10,10 @@ exports.signup = async (req, res) => {
     username: req.body.username,
     email: req.body.email,
     password: req.body.password,
+    phone_number: req.body.phone_number,
   };
 
-  if (!user.username || !user.email || !user.password) {
+  if (!user.username || !user.email || !user.password || !user.phone_number) {
     return res.status(400).json({
       message: "All fields are required",
     });
@@ -54,45 +55,6 @@ exports.signup = async (req, res) => {
   console.log(token);
 };
 
-// exports.login = (req, res, next) => {
-//   User.findOne({
-//     where: { email: req.body.email },
-//   })
-//     .then((user) => {
-//       if (user) {
-//         user.passwordComparison(req.body.password).then((passwordMatch) => {
-//           if (passwordMatch) {
-//             console.log(`Success ${user.name}`);
-//             const payload = { id: user.id };
-//             const token = jwt.sign(payload, "mySecretKey", {
-//               expiresIn: "24h",
-//             });
-//             req.user = user;
-//             res
-//               .status(200)
-//               .json({
-//                 message: "ok",
-//                 token,
-//                 username: user.username,
-//                 email: user.email,
-//                 id: user.id,
-//                 role_id: user.role_id,
-//               });
-//           } else {
-//             console.log("Error");
-//             res.status(401).json({ message: "Invalid credentials" });
-//           }
-//           next();
-//         });
-//       } else {
-//         next();
-//       }
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//       next(error);
-//     });
-// };
 
 exports.login = async (req, res, next) => {
   try {

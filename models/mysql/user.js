@@ -1,3 +1,5 @@
+const { ka } = require("date-fns/locale");
+
 module.exports = (sequelize, DataTypes) => {
   const bcrypt = require("bcrypt");
 
@@ -11,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,  
     },
+    phone_number: {
+      type: DataTypes.STRING,
+      unique: true,
+    },
     email: {
         type: DataTypes.STRING,
         unique: true,
@@ -22,6 +28,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     carsRented: {
       type: DataTypes.STRING,
+    },
+    role_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'roles',
+        key: 'id',
+      }
     }
   }, 
   {
@@ -49,6 +62,10 @@ module.exports = (sequelize, DataTypes) => {
       throw error;
     }
   };
+
+  User.associate = (models) => {
+    User.belongsTo(models.roles, {'foreignKey': 'role_id'});
+  }
 
   return User;
 };
