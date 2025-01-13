@@ -43,11 +43,11 @@ const Cars = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CarFeature'        
     }],
-    car_category: {
+    car_category: [{
         type: mongoose.Schema.Types.ObjectId,   
         ref: 'CarCategory',
         required: true
-    }
+    }]
 })
 
 module.exports = mongoose.model("Cars", Cars, 'cars')

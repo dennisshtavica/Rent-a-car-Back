@@ -6,13 +6,13 @@ const {format} = require('date-fns');
 
 exports.addBooking = async (req, res) => {
   try {
-    const { carId, pickupLocation, pickupDate, returnDate, userId } = req.body;
+    const { carId, pickupLocation, returnLocation, rentalDate, userId } = req.body;
 
     const newBooking = new Bookings({
       carId,
       pickupLocation,
-      pickupDate,
-      returnDate,
+      returnLocation,
+      rentalDate,
     });
 
     const savedBooking = await newBooking.save();
@@ -124,3 +124,14 @@ exports.cancelBooking = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getBookings = async (req, res) => {
+  try {
+    const bookings = await Bookings.find({});
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}

@@ -18,12 +18,12 @@ const Bookings = mongoose.Schema({
         type: Date,
         required: true,
     },
-    booking_status: {
-        type: String,         
-        enum: ['pending', 'confirmed', 'cancelled', 'completed'], 
-        default: 'pending',   
-        required: true        
-    }
+    // booking_status: {
+    //     type: String,         
+    //     enum: ['pending', 'confirmed', 'cancelled', 'completed'], 
+    //     default: 'pending',   
+    //     required: true        
+    // }
 })
 
 module.exports = mongoose.model("Bookings", Bookings, 'bookings')

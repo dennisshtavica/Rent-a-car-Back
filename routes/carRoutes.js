@@ -14,6 +14,7 @@ module.exports = (app) => {
     router.get("/getCarBrands", [authJwt.verifyToken], carsController.getCarBrands);
     router.get("/getCarModels/:brand", [authJwt.verifyToken], carsController.getCarModels);
 
+    router.get('/bookings', [authJwt.verifyToken], bookingsController.getBookings);
     router.post('/bookings', [authJwt.verifyToken], bookingsController.addBooking);
     router.get('/carsRented/:userId', [authJwt.verifyToken], bookingsController.getBookedCar);
     router.delete('/cancelBooking/:userId/:bookingId', [authJwt.verifyToken], bookingsController.cancelBooking);

@@ -12,6 +12,10 @@ exports.addCar = async (req, res) => {
     range: req.body.range,
     type: req.body.type,
     price: req.body.price,
+    year: req.body.year,
+    available: req.body.available,
+    car_features: req.body.car_features,
+    car_category: req.body.car_category,
   });
 
   newCar
