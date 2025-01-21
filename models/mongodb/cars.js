@@ -32,6 +32,10 @@ const Cars = mongoose.Schema({
         type: Boolean,           
         default: true            
     },
+    fuelType: {
+        type: String,
+        required: true
+    },
     car_features: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CarFeatures',

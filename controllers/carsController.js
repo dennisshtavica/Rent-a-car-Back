@@ -24,6 +24,7 @@ exports.addCar = async (req, res) => {
       price: req.body.price,
       year: req.body.year,
       available: req.body.available,
+      fuelType: req.body.fuelType,
       car_features: carFeatures,
       car_category: carCategory,
     });
