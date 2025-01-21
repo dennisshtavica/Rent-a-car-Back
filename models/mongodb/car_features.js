@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const CarFeatures = mongoose.Schema({
+const CarFeatures = new mongoose.Schema({
     feature_name: {
         type: String,
         required: true,   

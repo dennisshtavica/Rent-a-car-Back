@@ -3,31 +3,39 @@ const path = require("path");
 
 
 exports.addCar = async (req, res) => {
-  const newCar = new Cars({
-    name: req.body.name,
-    model: req.body.model,
-    image: req.file.path,
-    seats: req.body.seats,
-    transmission: req.body.transmission,
-    range: req.body.range,
-    type: req.body.type,
-    price: req.body.price,
-    year: req.body.year,
-    available: req.body.available,
-    car_features: req.body.car_features,
-    car_category: req.body.car_category,
-  });
+  try {
+    // Parse the JSON strings if they're coming as strings
+    const carFeatures = Array.isArray(req.body.car_features) 
+      ? req.body.car_features 
+      : JSON.parse(req.body.car_features);
+    
+    const carCategory = Array.isArray(req.body.car_category)
+      ? req.body.car_category
+      : JSON.parse(req.body.car_category);
 
-  newCar
-      .save()
-      .then((car) => {
-        res.status(201).json({ message: "Car added successfully", car });
-      })
-      .catch((error) => {
-        console.error("Error adding car:", error);
-        res.status(500).json({ error: "Internal server error" });
-      });
+    const newCar = new Cars({
+      brand: req.body.brand,
+      model: req.body.model,
+      image: req.file.path,
+      seats: req.body.seats,
+      transmission: req.body.transmission,
+      price: req.body.price,
+      year: req.body.year,
+      available: req.body.available,
+      car_features: carFeatures,
+      car_category: carCategory,
+    });
+
+    const savedCar = await newCar.save();
+    res.status(201).json({ message: "Car added successfully", car: savedCar });
+  } catch (error) {
+    console.error("Error adding car:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
+
+
+
 exports.deleteCars = (req, res, next) => {
   Cars.deleteMany({})
       .then(() => {
@@ -39,16 +47,26 @@ exports.deleteCars = (req, res, next) => {
       });
 };
 
-exports.getCars = (req, res, next) => {
-  Cars.find({})
-      .then((cars) => {
-        res.status(200).send(cars);
-        next();
+exports.getCars = async (req, res) => {
+  try {
+    const cars = await Cars.find({})
+      .populate({
+        path: "car_category", 
+        select: "category_name", 
       })
-      .catch((err) => {
-        console.log("Err", err);
+      .populate({
+        path: "car_features", 
+        select: "feature_name", 
       });
+
+    res.status(200).json(cars);
+  } catch (err) {
+    console.error("Error fetching cars:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
+
+
 
 exports.searchCars = async (req, res) => {
   try {

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const Cars = mongoose.Schema({
-    name: {
+    brand: {
         type: String,
         required: true,
     },
@@ -20,13 +20,6 @@ const Cars = mongoose.Schema({
         type: String,
         required: true,
     },
-    range: {
-        type: String,
-    },
-    type: {
-        type: String,
-        required: true
-    },
     price: {
         type: Number,
         required: true
@@ -41,7 +34,8 @@ const Cars = mongoose.Schema({
     },
     car_features: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'CarFeature'        
+        ref: 'CarFeatures',
+        required: true        
     }],
     car_category: [{
         type: mongoose.Schema.Types.ObjectId,   
