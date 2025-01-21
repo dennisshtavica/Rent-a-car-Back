@@ -1,5 +1,7 @@
 const Cars = require("../models/mongodb/cars");
 const path = require("path");
+const CarCategory = require("../models/mongodb/car_category");
+const CarFeatures = require("../models/mongodb/car_features");
 
 
 exports.addCar = async (req, res) => {
