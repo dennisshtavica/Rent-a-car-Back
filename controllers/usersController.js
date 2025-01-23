@@ -106,6 +106,7 @@ exports.login = async (req, res, next) => {
             role_id: result.role_id,
             username: user.username,
             email: user.email,
+            phone_number: user.phone_number,
             id: user.id,
           });
         } else {
