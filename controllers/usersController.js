@@ -184,3 +184,13 @@ exports.getOneUser = (req, res) => {
       console.log(`Error fetching user by ID: ${err.message}`);
     });
 };
+
+exports.getAllUsers = (req, res) => {
+  User.findAll()
+    .then((users) => {
+      res.send(users);
+    })
+    .catch((err) => {
+      console.log(`Error fetching all users: ${err.message}`);
+    });
+};
