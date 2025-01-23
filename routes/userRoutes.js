@@ -19,6 +19,7 @@ module.exports = (app) => {
   router.post("/login", usersController.login);
   router.get("/users/edit/:id", [authJwt.verifyToken], usersController.getOneUser)
   router.put('/users/edit/:id', [authJwt.verifyToken], usersController.editUser)
+  router.get("/getUser/:id", [authJwt.verifyToken], usersController.getOneUser)
 
   router.post("/newMagazine", magazineController.createMagazine);
   router.get("/publisher", publisherController.getPublisher);
