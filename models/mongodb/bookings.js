@@ -15,9 +15,13 @@ const Bookings = mongoose.Schema({
         required: true        
     },
     rentalDate: {
-        type: Date,
-        required: true,
-    },
+        from: { type: Date, required: true }, 
+        to: { type: Date, required: true },   
+      },
+    booking_status: { type: String, default: "pending" }, 
+    username: { type: String, required: true },
+    email: { type: String, required: true },
+    phone_number: { type: String, required: true },
     // booking_status: {
     //     type: String,         
     //     enum: ['pending', 'confirmed', 'cancelled', 'completed'], 

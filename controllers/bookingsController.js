@@ -139,9 +139,59 @@ exports.getBookings = async (req, res) => {
 }
 
 
+// exports.createPaymentIntent = async (req, res) => {
+//   try {
+//     const { amount, carName } = req.body;
+
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       line_items: [
+//         {
+//           price_data: {
+//             currency: 'eur',
+//             product_data: {
+//               name: carName,
+//             },
+//             unit_amount: Math.round(amount * 100), 
+//           },
+//           quantity: 1,
+//         },
+//       ],
+//       mode: 'payment',
+//       success_url: `http://localhost:5173/success`,
+//       cancel_url: `http://localhost:5173/cancel`,
+//     });
+
+//     res.json({ url: session.url });
+//   } catch (error) {
+//     console.error('Error creating checkout session:', error);
+//     res.status(500).json({ 
+//       message: 'Error creating checkout session',
+//       error: error.message,
+//     });
+//   }
+// };
+
 exports.createPaymentIntent = async (req, res) => {
   try {
-    const { amount, carName } = req.body;
+    const { 
+      amount, 
+      carName, 
+      carId, 
+      pickupLocation, 
+      returnLocation, 
+      rentalDate, 
+      username, 
+      email, 
+      phone_number 
+    } = req.body;
+
+    const formattedRentalDate = {
+      from: new Date(rentalDate.from),
+      to: new Date(rentalDate.to),
+    };
+
+
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -152,7 +202,7 @@ exports.createPaymentIntent = async (req, res) => {
             product_data: {
               name: carName,
             },
-            unit_amount: Math.round(amount * 100), 
+            unit_amount: Math.round(amount * 100),
           },
           quantity: 1,
         },
@@ -162,13 +212,27 @@ exports.createPaymentIntent = async (req, res) => {
       cancel_url: `http://localhost:5173/cancel`,
     });
 
+
+    const booking = new Bookings({
+      carId,
+      pickupLocation,
+      returnLocation,
+      rentalDate: formattedRentalDate, 
+      booking_status: 'Pending',
+      username,
+      email,
+      phone_number,
+    });
+
+    await booking.save();
+
+
     res.json({ url: session.url });
   } catch (error) {
-    console.error('Error creating checkout session:', error);
-    res.status(500).json({ 
-      message: 'Error creating checkout session',
+    console.error('Error creating checkout session or saving booking:', error);
+    res.status(500).json({
+      message: 'Error creating checkout session or saving booking',
       error: error.message,
     });
   }
 };
-
