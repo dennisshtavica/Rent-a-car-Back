@@ -18,9 +18,12 @@ module.exports = (app) => {
   router.post("/signup", usersController.signup);
   router.post("/login", usersController.login);
   router.get("/users/edit/:id", [authJwt.verifyToken], usersController.getOneUser)
-  router.put('/users/edit/:id', [authJwt.verifyToken], usersController.editUser)
   router.get("/getUser/:id", [authJwt.verifyToken], usersController.getOneUser)
   router.get("/getUsers", [authJwt.verifyToken], usersController.getAllUsers)
+  
+  router.post("/users/create", [authJwt.verifyToken], usersController.createUser);
+  router.delete("/users/:id", [authJwt.verifyToken], usersController.deleteUser);
+  router.put('/users/edit/:id', [authJwt.verifyToken], usersController.editUser)
 
   router.post("/newMagazine", magazineController.createMagazine);
   router.get("/publisher", publisherController.getPublisher);

@@ -11,6 +11,7 @@ const Cars = mongoose.Schema({
     },
     image: {
         type: String,
+        required: true,
     },
     seats: {
         type: Number,
@@ -36,16 +37,22 @@ const Cars = mongoose.Schema({
         type: String,
         required: true
     },
-    car_features: [{
-        type: mongoose.Schema.Types.ObjectId,
+    car_features: {
+        type: [mongoose.Schema.Types.ObjectId],  // Array of ObjectIds
         ref: 'CarFeatures',
-        required: true        
-    }],
-    car_category: [{
+        required: true,
+        validate: {
+            validator: function(v) {
+                return v && v.length > 0; // Ensure array is not empty
+            },
+            message: 'At least one feature must be selected'
+        }
+    },
+    car_category: {
         type: mongoose.Schema.Types.ObjectId,   
         ref: 'CarCategory',
         required: true
-    }]
-})
+    }
+});
 
-module.exports = mongoose.model("Cars", Cars, 'cars')
+module.exports = mongoose.model("Cars", Cars, 'cars');

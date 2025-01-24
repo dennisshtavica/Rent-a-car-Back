@@ -129,12 +129,12 @@ exports.login = async (req, res, next) => {
 
 exports.editUser = async (req, res) => {
   const userId = req.params.id;
-  const { name, email, password } = req.body;
+  const { username, email, password, phone_number, role_id } = req.body;
 
-  if (!name || !email) {
+  if (!username || !email || !phone_number || !role_id) {
     return res
       .status(400)
-      .json({ message: "Name and role_id are required for the update" });
+      .json({ message: "All fields are required (username, email, phone_number, role_id)" });
   }
 
   try {
@@ -156,15 +156,29 @@ exports.editUser = async (req, res) => {
       }
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Only hash password if it's provided
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
 
-    user.username = name;
+    user.username = username;
     user.email = email;
-    user.password = hashedPassword;
+    user.phone_number = phone_number;
+    user.role_id = role_id;
 
     await user.save();
 
-    res.json({ message: "User updated successfully", user });
+    res.json({ 
+      message: "User updated successfully", 
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        phone_number: user.phone_number,
+        role_id: user.role_id
+      }
+    });
   } catch (error) {
     console.error("Error updating user:", error);
     res
@@ -193,4 +207,90 @@ exports.getAllUsers = (req, res) => {
     .catch((err) => {
       console.log(`Error fetching all users: ${err.message}`);
     });
+};
+
+exports.createUser = async (req, res) => {
+  try {
+    const user = {
+      username: req.body.username,
+      email: req.body.email,
+      password: req.body.password,
+      phone_number: req.body.phone_number,
+      role_id: req.body.role_id
+    };
+
+    if (!user.username || !user.email || !user.password || !user.phone_number || !user.role_id) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required (username, email, password, phone_number, role_id)",
+      });
+    }
+
+    const userExist = await User.findOne({
+      where: { email: user.email },
+    });
+
+    if (userExist) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with the given email",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    user.password = hashedPassword;
+
+    const newUser = await User.create(user);
+
+    // Send response
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      data: {
+        role_id: newUser.role_id,
+        username: newUser.username,
+        email: newUser.email,
+        phone_number: newUser.phone_number,
+        id: newUser.id
+      }
+    });
+
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating user",
+      error: error.message
+    });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await User.findByPk(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    await user.destroy();
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully"
+    });
+
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting user",
+      error: error.message
+    });
+  }
 };
