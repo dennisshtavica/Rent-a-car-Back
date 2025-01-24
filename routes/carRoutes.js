@@ -19,5 +19,14 @@ module.exports = (app) => {
     router.get('/carsRented/:userId', [authJwt.verifyToken], bookingsController.getBookedCar);
     router.delete('/cancelBooking/:userId/:bookingId', [authJwt.verifyToken], bookingsController.cancelBooking);
 
+    router.put("/updateCar/:id", 
+        [authJwt.verifyToken], 
+        multerMiddleware.upload.single("image"), 
+        carsController.updateCar
+    );
+
+    router.get("/features", [authJwt.verifyToken], carsController.getFeatures);
+    router.get("/categories", [authJwt.verifyToken], carsController.getCategories);
+
     app.use(router);
 };

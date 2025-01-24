@@ -138,17 +138,27 @@ exports.getCategories = async (req, res) => {
 };
 
 
-exports.deleteCars = (req, res) => {
-  const { carId } = req.body;
-  
-  Cars.findByIdAndDelete(carId)
-    .then(() => {
-      res.status(200).json({ message: "Car deleted successfully" });
-    })
-    .catch((err) => {
-      console.log("Err", err);
-      res.status(500).json({ message: "Error deleting car", error: err });
+exports.deleteCars = async (req, res) => {
+  try {
+    const carId = req.params.id;
+    
+    const deletedCar = await Cars.findByIdAndDelete(carId);
+    
+    if (!deletedCar) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+    
+    res.status(200).json({ 
+      message: "Car deleted successfully",
+      deletedCar 
     });
+  } catch (err) {
+    console.error("Error deleting car:", err);
+    res.status(500).json({ 
+      message: "Error deleting car", 
+      error: err.message 
+    });
+  }
 };
 
 exports.getCars = async (req, res) => {
