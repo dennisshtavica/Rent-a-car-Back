@@ -43,7 +43,7 @@ const Cars = mongoose.Schema({
         required: true,
         validate: {
             validator: function(v) {
-                return v && v.length > 0; // Ensure array is not empty
+                return v && v.length > 0;
             },
             message: 'At least one feature must be selected'
         }
