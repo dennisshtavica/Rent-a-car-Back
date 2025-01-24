@@ -9,7 +9,7 @@ module.exports = (app) => {
     router.get("/getCars", [authJwt.verifyToken], carsController.getCars);
     router.get("/search-results/:carBrand/:carModel", [authJwt.verifyToken], carsController.searchCars);
     router.get("/bookingPage/:id", [authJwt.verifyToken], carsController.getOneCar);
-
+    router.post("/create-checkout-session", bookingsController.createPaymentIntent);
     //new routes for getting car brands and models
     router.get("/getCarBrands", [authJwt.verifyToken], carsController.getCarBrands);
     router.get("/getCarModels/:brand", [authJwt.verifyToken], carsController.getCarModels);

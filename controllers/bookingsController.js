@@ -3,6 +3,8 @@ const db = require("../models/mysql");
 const User = db.users;
 const Car = require("../models/mongodb/cars");
 const {format} = require('date-fns');
+require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.addBooking = async (req, res) => {
   try {
@@ -135,3 +137,38 @@ exports.getBookings = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+
+exports.createPaymentIntent = async (req, res) => {
+  try {
+    const { amount, carName } = req.body;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: carName,
+            },
+            unit_amount: Math.round(amount * 100), 
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `http://localhost:5173/success`,
+      cancel_url: `http://localhost:5173/cancel`,
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ 
+      message: 'Error creating checkout session',
+      error: error.message,
+    });
+  }
+};
+
