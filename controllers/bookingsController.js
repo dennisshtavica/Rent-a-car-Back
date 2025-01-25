@@ -7,7 +7,6 @@ const {format} = require('date-fns');
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-//webhoookin e kom bo veq ki me implementu, se smujta, kqyre a esht mir just in case e fundit esht
 
 exports.getAllBookings = async (req, res) => {
   try {
@@ -214,6 +213,18 @@ exports.cancelBooking = async (req, res) => {
           return res.status(404).json({
               message: "Booking not found"
           });
+      }
+
+      const user = await User.findByPk(userId);
+      if (user) {
+        let carsRented = [];
+        if (user.carsRented) {
+          carsRented = JSON.parse(user.carsRented);
+        }
+        
+        carsRented = carsRented.filter(id => id !== bookingId);
+        user.carsRented = JSON.stringify(carsRented);
+        await user.save();
       }
 
       res.status(200).json({
