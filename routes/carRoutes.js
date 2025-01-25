@@ -18,6 +18,7 @@ module.exports = (app) => {
     router.post('/bookings', [authJwt.verifyToken], bookingsController.addBooking);
     router.get('/carsRented/:userId', [authJwt.verifyToken], bookingsController.getBookedCar);
     router.delete('/cancelBooking/:userId/:bookingId', [authJwt.verifyToken], bookingsController.cancelBooking);
+    router.get('/allBookings', [authJwt.verifyToken], bookingsController.getAllBookings);
 
     router.put("/updateCar/:id", 
         [authJwt.verifyToken], 
@@ -27,8 +28,6 @@ module.exports = (app) => {
 
     router.get("/features", [authJwt.verifyToken], carsController.getFeatures);
     router.get("/categories", [authJwt.verifyToken], carsController.getCategories);
-
-    // Add this new route for deleting a single car
     router.delete("/cars/:id", [authJwt.verifyToken], carsController.deleteCar);
 
     app.use(router);

@@ -6,6 +6,10 @@ const Bookings = mongoose.Schema({
         ref: "Cars",
         required: true,
     },
+    userId: {  // Add this field
+        type: String,
+        required: true,
+    },
     pickupLocation: {
         type: String,
         required: true,
@@ -17,17 +21,17 @@ const Bookings = mongoose.Schema({
     rentalDate: {
         from: { type: Date, required: true }, 
         to: { type: Date, required: true },   
-      },
-    booking_status: { type: String, default: "pending" }, 
+    },
+    booking_status: { 
+        type: String, 
+        enum: ['Pending', 'Confirmed', 'Cancelled'],
+        default: "Pending" 
+    }, 
     username: { type: String, required: true },
     email: { type: String, required: true },
     phone_number: { type: String, required: true },
-    // booking_status: {
-    //     type: String,         
-    //     enum: ['pending', 'confirmed', 'cancelled', 'completed'], 
-    //     default: 'pending',   
-    //     required: true        
-    // }
-})
+}, {
+    timestamps: true // Add timestamps for createdAt and updatedAt
+});
 
-module.exports = mongoose.model("Bookings", Bookings, 'bookings')
+module.exports = mongoose.model("Bookings", Bookings, 'bookings');
