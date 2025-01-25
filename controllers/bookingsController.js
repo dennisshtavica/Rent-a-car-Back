@@ -140,27 +140,31 @@ exports.addBooking = async (req, res) => {
 
 exports.getBookedCar = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    console.log('1. Received request for userId:', userId);
+    const userId = req.params.userId.toString();
+    
+    // Get user from MySQL to get the username
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    console.log('2. Searching for bookings with userId:', userId);
-    const bookings = await Bookings.find({ userId: userId });
-    console.log('3. Found bookings:', JSON.stringify(bookings, null, 2));
+    // Find bookings in MongoDB matching both userId and username
+    const bookings = await Bookings.find({ 
+      userId: userId,
+      username: user.username // Add username filter
+    }).lean();
+
+    console.log(`Found ${bookings.length} bookings for user ${user.username}`);
 
     if (!bookings || bookings.length === 0) {
-      console.log('4. No bookings found for user');
       return res.status(200).json([]);
     }
 
     const carIds = bookings.map(booking => booking.carId);
-    console.log('5. Extracted carIds:', carIds);
-
-    const cars = await Car.find({ _id: { $in: carIds } });
-    console.log('6. Found cars:', JSON.stringify(cars, null, 2));
+    const cars = await Car.find({ _id: { $in: carIds } }).lean();
 
     const bookedCarsWithDetails = bookings.map(booking => {
-      const carDetails = cars.find(car => car._id.equals(booking.carId));
-      console.log('7. Processing booking:', booking._id, 'with car:', carDetails?._id);
+      const carDetails = cars.find(car => car._id.toString() === booking.carId.toString());
 
       let formattedDates;
       try {
@@ -168,7 +172,7 @@ exports.getBookedCar = async (req, res) => {
         const toDateFormatted = format(new Date(booking.rentalDate.to), 'dd MMM yyyy');
         formattedDates = `${fromDateFormatted} - ${toDateFormatted}`;
       } catch (error) {
-        console.error('8. Error formatting dates for booking:', booking._id, error);
+        console.error('Error formatting dates for booking:', booking._id, error);
         formattedDates = 'Date format error';
       }
 
@@ -182,19 +186,17 @@ exports.getBookedCar = async (req, res) => {
       };
     });
 
-    console.log('9. Sending response:', JSON.stringify(bookedCarsWithDetails, null, 2));
     res.status(200).json(bookedCarsWithDetails);
 
   } catch (error) {
-    console.error("10. Error in getBookedCar:", error);
-    console.error("Stack trace:", error.stack);
+    console.error("Error in getBookedCar:", error);
     res.status(500).json({ 
       message: "Error fetching booked cars", 
-      error: error.message,
-      stack: error.stack
+      error: error.message 
     });
   }
 };
+
 
 exports.cancelBooking = async (req, res) => {
   try {
