@@ -28,5 +28,8 @@ module.exports = (app) => {
     router.get("/features", [authJwt.verifyToken], carsController.getFeatures);
     router.get("/categories", [authJwt.verifyToken], carsController.getCategories);
 
+    // Add this new route for deleting a single car
+    router.delete("/cars/:id", [authJwt.verifyToken], carsController.deleteCar);
+
     app.use(router);
 };

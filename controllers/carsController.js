@@ -65,32 +65,39 @@ exports.addCar = async (req, res) => {
 exports.updateCar = async (req, res) => {
   try {
     console.log('Update request for car:', req.params.id);
-    console.log('Update data:', req.body);
-
+    
     const carId = req.params.id;
     
+    // Parse the JSON data from the FormData
+    const jsonData = JSON.parse(req.body.data);
+    console.log('Received update data:', jsonData);
+
     const updateData = {
-      brand: req.body.brand,
-      model: req.body.model,
-      seats: Number(req.body.seats),
-      transmission: req.body.transmission,
-      price: Number(req.body.price),
-      year: Number(req.body.year),
-      fuelType: req.body.fuelType,
-      car_features: Array.isArray(req.body['car_features[]']) 
-        ? req.body['car_features[]'] 
-        : [req.body['car_features[]']],
-      car_category: req.body.car_category
+      brand: jsonData.brand,
+      model: jsonData.model,
+      seats: Number(jsonData.seats),
+      transmission: jsonData.transmission,
+      price: Number(jsonData.price),
+      year: Number(jsonData.year),
+      fuelType: jsonData.fuelType,
+      car_category: jsonData.car_category,
+      car_features: jsonData.car_features // This should now be an array
     };
 
+    // Handle image if present
     if (req.file) {
       updateData.image = req.file.path;
     }
 
+    console.log('Final update data:', updateData);
+
     const updatedCar = await Cars.findByIdAndUpdate(
       carId,
       updateData,
-      { new: true, runValidators: true }
+      { 
+        new: true, 
+        runValidators: true 
+      }
     ).populate('car_features').populate('car_category');
 
     if (!updatedCar) {
