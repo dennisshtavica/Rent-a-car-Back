@@ -141,25 +141,21 @@ exports.getBookedCar = async (req, res) => {
   try {
     const userId = req.params.userId.toString();
     
-    // Get user from MySQL to get the username
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Find bookings in MongoDB matching both userId and username
-    const bookings = await Bookings.find({ 
-      userId: userId,
-      username: user.username // Add username filter
-    }).lean();
 
-    console.log(`Found ${bookings.length} bookings for user ${user.username}`);
-
-    if (!bookings || bookings.length === 0) {
-      return res.status(200).json([]);
+    let bookingIds = [];
+    if (user.carsRented) {
+      bookingIds = JSON.parse(user.carsRented);
     }
 
+    const bookings = await Bookings.find({ _id: { $in: bookingIds } });
+
     const carIds = bookings.map(booking => booking.carId);
+
     const cars = await Car.find({ _id: { $in: carIds } }).lean();
 
     const bookedCarsWithDetails = bookings.map(booking => {
