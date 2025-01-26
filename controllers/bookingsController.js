@@ -287,6 +287,11 @@ exports.createPaymentIntent = async (req, res) => {
       mode: 'payment',
       success_url: `http://localhost:5173/success`,
       cancel_url: `http://localhost:5173/cancel`,
+      metadata: {
+        carId,
+        userId,
+        // bookingId: savedBooking._id.toString(),
+      },
     });
 
     const booking = new Bookings({
@@ -359,6 +364,13 @@ exports.handleStripeWebhook = async (req, res) => {
         booking.booking_status = 'Confirmed';
         await booking.save();
       }
+
+      const car = await Car.findById(booking.carId);
+      if (car) {
+        car.available = false;
+        await car.save();
+      }
+
     } catch (error) {
       console.error('Error updating booking status:', error);
     }

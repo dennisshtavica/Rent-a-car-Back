@@ -2,6 +2,7 @@ const router = require("express").Router();
 const carsController = require("../controllers/carsController")
 const bookingsController = require('../controllers/bookingsController')
 const { authJwt, multerMiddleware } = require("../middlewares/index");
+const express = require('express');
 
 module.exports = (app) => {
     router.post("/addCar", [authJwt.verifyToken], multerMiddleware.upload.single("image"), carsController.addCar);

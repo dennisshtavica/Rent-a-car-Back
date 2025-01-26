@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const bookingsController = require('./controllers/bookingsController');
 
 const app = express();
 
@@ -8,6 +9,15 @@ const corsOptions = {
   origin: "*",
   credentials: true,
 };
+
+
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }), 
+  (req, res) => {
+    bookingsController.handleStripeWebhook(req, res);
+  }
+);
 
 
 app.use(cors(corsOptions));
@@ -50,6 +60,7 @@ const mongodbConn = require("./db/mongodb");
   
 require("./routes/userRoutes")(app)
 require("./routes/carRoutes")(app)
+
 
 
 app.get("/", (req, res) => {
