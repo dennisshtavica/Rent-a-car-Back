@@ -7,7 +7,6 @@ const {format} = require('date-fns');
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-
 exports.getAllBookings = async (req, res) => {
   try {
       console.log('1. Starting getAllBookings');
@@ -44,7 +43,8 @@ exports.getAllBookings = async (req, res) => {
           const car = carMap[booking.carId?.toString()] || {
               brand: 'Unknown',
               model: 'Unknown',
-              image: 'default-car.jpg'
+              image: 'default-car.jpg',
+              price: car.price || 0
           };
 
           const user = userMap[booking.userId] || {
@@ -78,7 +78,8 @@ exports.getAllBookings = async (req, res) => {
               car: {
                   brand: car.brand || 'Unknown',
                   model: car.model || 'Unknown',
-                  image: car.image || 'default-car.jpg'
+                  image: car.image || 'default-car.jpg',
+                  price: car.price || 0
               },
               user: {
                   username: user.username || 'Unknown User',
@@ -146,16 +147,18 @@ exports.getBookedCar = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const bookings = await Bookings.find({ 
+      userId: userId,
+      username: user.username 
+    }).lean();
 
-    let bookingIds = [];
-    if (user.carsRented) {
-      bookingIds = JSON.parse(user.carsRented);
+    console.log(`Found ${bookings.length} bookings for user ${user.username}`);
+
+    if (!bookings || bookings.length === 0) {
+      return res.status(200).json([]);
     }
 
-    const bookings = await Bookings.find({ _id: { $in: bookingIds } });
-
     const carIds = bookings.map(booking => booking.carId);
-
     const cars = await Car.find({ _id: { $in: carIds } }).lean();
 
     const bookedCarsWithDetails = bookings.map(booking => {
@@ -209,18 +212,6 @@ exports.cancelBooking = async (req, res) => {
           return res.status(404).json({
               message: "Booking not found"
           });
-      }
-
-      const user = await User.findByPk(userId);
-      if (user) {
-        let carsRented = [];
-        if (user.carsRented) {
-          carsRented = JSON.parse(user.carsRented);
-        }
-        
-        carsRented = carsRented.filter(id => id !== bookingId);
-        user.carsRented = JSON.stringify(carsRented);
-        await user.save();
       }
 
       res.status(200).json({
@@ -283,11 +274,6 @@ exports.createPaymentIntent = async (req, res) => {
       mode: 'payment',
       success_url: `http://localhost:5173/success`,
       cancel_url: `http://localhost:5173/cancel`,
-      metadata: {
-        carId,
-        userId,
-        // bookingId: savedBooking._id.toString(),
-      },
     });
 
     const booking = new Bookings({
@@ -360,13 +346,6 @@ exports.handleStripeWebhook = async (req, res) => {
         booking.booking_status = 'Confirmed';
         await booking.save();
       }
-
-      const car = await Car.findById(booking.carId);
-      if (car) {
-        car.available = false;
-        await car.save();
-      }
-
     } catch (error) {
       console.error('Error updating booking status:', error);
     }
