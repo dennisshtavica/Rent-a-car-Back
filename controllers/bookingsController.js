@@ -147,18 +147,16 @@ exports.getBookedCar = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const bookings = await Bookings.find({ 
-      userId: userId,
-      username: user.username 
-    }).lean();
 
-    console.log(`Found ${bookings.length} bookings for user ${user.username}`);
-
-    if (!bookings || bookings.length === 0) {
-      return res.status(200).json([]);
+    let bookingIds = [];
+    if (user.carsRented) {
+      bookingIds = JSON.parse(user.carsRented);
     }
 
+    const bookings = await Bookings.find({ _id: { $in: bookingIds } });
+
     const carIds = bookings.map(booking => booking.carId);
+
     const cars = await Car.find({ _id: { $in: carIds } }).lean();
 
     const bookedCarsWithDetails = bookings.map(booking => {
@@ -195,7 +193,6 @@ exports.getBookedCar = async (req, res) => {
   }
 };
 
-
 exports.cancelBooking = async (req, res) => {
   try {
       const { userId, bookingId } = req.params;
@@ -212,6 +209,18 @@ exports.cancelBooking = async (req, res) => {
           return res.status(404).json({
               message: "Booking not found"
           });
+      }
+
+      const user = await User.findByPk(userId);
+      if (user) {
+        let carsRented = [];
+        if (user.carsRented) {
+          carsRented = JSON.parse(user.carsRented);
+        }
+        
+        carsRented = carsRented.filter(id => id !== bookingId);
+        user.carsRented = JSON.stringify(carsRented);
+        await user.save();
       }
 
       res.status(200).json({
@@ -274,6 +283,11 @@ exports.createPaymentIntent = async (req, res) => {
       mode: 'payment',
       success_url: `http://localhost:5173/success`,
       cancel_url: `http://localhost:5173/cancel`,
+      metadata: {
+        carId,
+        userId,
+        // bookingId: savedBooking._id.toString(),
+      },
     });
 
     const booking = new Bookings({
@@ -346,6 +360,13 @@ exports.handleStripeWebhook = async (req, res) => {
         booking.booking_status = 'Confirmed';
         await booking.save();
       }
+
+      const car = await Car.findById(booking.carId);
+      if (car) {
+        car.available = false;
+        await car.save();
+      }
+
     } catch (error) {
       console.error('Error updating booking status:', error);
     }
