@@ -6,7 +6,7 @@ const Bookings = mongoose.Schema({
         ref: "Cars",
         required: true,
     },
-    userId: {  // Add this field
+    userId: {  
         type: String,
         required: true,
     },
