@@ -6,6 +6,7 @@ const Car = require("../models/mongodb/cars");
 const {format} = require('date-fns');
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const Payment = require("../models/mongodb/payments");
 
 exports.getAllBookings = async (req, res) => {
   try {
@@ -304,6 +305,17 @@ exports.createPaymentIntent = async (req, res) => {
 
     const savedBooking = await booking.save();
 
+    const payment = new Payment({
+      payment_id: session.id, 
+      booking_id: savedBooking._id, 
+      user_id: userId, 
+      amount: Math.round(amount * 100), 
+      currency: 'eur', 
+      status: 'pending', 
+    });
+
+    await payment.save();
+
     const user = await User.findByPk(userId);
     if (user) {
       let carsRented = [];
@@ -350,6 +362,13 @@ exports.handleStripeWebhook = async (req, res) => {
     const session = event.data.object;
     
     try {
+      const payment = await Payment.findOne({ payment_id: session.id });
+      if (payment) {
+        payment.status = 'succeeded';
+        payment.updated_at = Date.now();
+        await payment.save();
+      }
+      
       const booking = await Bookings.findOne({
         carId: session.metadata.carId,
         userId: session.metadata.userId,
