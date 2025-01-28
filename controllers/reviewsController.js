@@ -92,7 +92,6 @@ const getReviews = async (req, res) => {
 const deleteReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
-        const { userId } = req.body; 
         
         const review = await Review.findOne({ _id: reviewId });
         
@@ -103,13 +102,6 @@ const deleteReview = async (req, res) => {
             });
         }
 
-        
-        if (review.userId !== userId) {
-            return res.status(403).json({
-                success: false,
-                message: 'Not authorized to delete this review'
-            });
-        }
 
         await Review.findByIdAndDelete(reviewId);
         
