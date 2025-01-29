@@ -3,7 +3,11 @@ const jwt = require("jsonwebtoken");
 const User = db.users;
 const bcrypt = require("bcrypt");
 const { sequelize } = require("../models/mysql");
-
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+const Sequelize = require("sequelize");
+require("dotenv").config();
+const {forgotMessage} = require('../utils/emailTemplate');
 
 exports.signup = async (req, res) => {
   const user = {
@@ -287,5 +291,99 @@ exports.deleteUser = async (req, res) => {
       message: "Error deleting user",
       error: error.message
     });
+  }
+};
+
+exports.requestResetPassword = async (req, res) => {
+  User.findOne({
+    where: { email: req.body.email },
+  }).then((user) => {
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const resetToken = user.getResetPasswordToken();
+
+    user.save();
+    // const transporter = nodemailer.createTransport({
+    //   service: 'gmail',
+    //   auth: {
+    //     user: 'dennisshtavica@gmail.com',
+    //     pass: ''
+    //   }
+    // })
+
+    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const message = forgotMessage(resetUrl, user);
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: user.email,
+      subject: "Reset Password",
+      html: message,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.log(err);
+
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+
+        user.save();
+      } else {
+        console.log("Email sent: " + info.response);
+        res.status(200).json({ message: `${user.email}` });
+      }
+    });
+  });
+};
+
+exports.resetPassword = async (req, res, next) => {
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.resetToken)
+    .digest("hex");
+  const { newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: {
+        resetPasswordToken,
+        resetPasswordExpire: { [Sequelize.Op.gt]: new Date() },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid Token" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpire = null;
+    await user.save();
+
+    const token = jwt.sign({ id: user.id },  'mySecretKey', {
+      expiresIn: "24h",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+      token: token,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server Error" });
+    console.log("err", err);
   }
 };

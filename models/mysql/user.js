@@ -1,4 +1,5 @@
 const { ka } = require("date-fns/locale");
+const crypto = require("crypto");
 
 module.exports = (sequelize, DataTypes) => {
   const bcrypt = require("bcrypt");
@@ -35,7 +36,15 @@ module.exports = (sequelize, DataTypes) => {
         model: 'roles',
         key: 'id',
       }
-    }
+    },
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    resetPasswordExpire: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   }, 
   {
     timestamps: true,
@@ -62,6 +71,13 @@ module.exports = (sequelize, DataTypes) => {
       throw error;
     }
   };
+
+  User.prototype.getResetPasswordToken = function () {
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    this.resetPasswordExpire = Date.now() + 3 * 60 * 60 * 1000;
+    return resetToken;
+  }
 
   User.associate = (models) => {
     User.belongsTo(models.roles, {'foreignKey': 'role_id'});

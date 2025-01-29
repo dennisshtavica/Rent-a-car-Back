@@ -24,6 +24,8 @@ module.exports = (app) => {
   router.post("/users/create", [authJwt.verifyToken], usersController.createUser);
   router.delete("/users/:id", [authJwt.verifyToken], usersController.deleteUser);
   router.put('/users/edit/:id', [authJwt.verifyToken], usersController.editUser)
+  router.post('/reset-password', usersController.requestResetPassword)
+  router.put("/reset-password/:resetToken", usersController.resetPassword)
 
   router.post("/newMagazine", magazineController.createMagazine);
   router.get("/publisher", publisherController.getPublisher);
