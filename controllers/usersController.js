@@ -210,59 +210,54 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  try {
-    const user = {
-      username: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
-      phone_number: req.body.phone_number,
-      role_id: req.body.role_id
-    };
+  const user = {
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password,
+    phone_number: req.body.phone_number,
+    role_id: req.body.role_id
+  };
 
-    if (!user.username || !user.email || !user.password || !user.phone_number || !user.role_id) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required (username, email, password, phone_number, role_id)",
-      });
-    }
-
-    const userExist = await User.findOne({
-      where: { email: user.email },
-    });
-
-    if (userExist) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists with the given email",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(user.password, 10);
-    user.password = hashedPassword;
-
-    const newUser = await User.create(user);
-
-    // Send response
-    res.status(201).json({
-      success: true,
-      message: "User created successfully",
-      data: {
-        role_id: newUser.role_id,
-        username: newUser.username,
-        email: newUser.email,
-        phone_number: newUser.phone_number,
-        id: newUser.id
-      }
-    });
-
-  } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error creating user",
-      error: error.message
+  if (!user.username || !user.email || !user.password || !user.phone_number || !user.role_id) {
+    return res.status(400).json({
+      message: "All fields are required (username, email, password, phone_number, role_id)",
     });
   }
+
+  const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+  if (!passwordRegex.test(user.password)) {
+    return res.status(400).json({
+      message:
+        "Password must be at least 8 characters long, contain at least one number and one uppercase letter",
+    });
+  }
+
+  const userExist = await User.findOne({
+    where: { email: req.body.email },
+  });
+
+  if (userExist) {
+    return res.status(400).json({
+      message: "User already exist with the given emailId",
+    });
+  }
+
+  User.create(user)
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => {
+      console.log(`Error creating user: ${err.message}`);
+    });
+
+  console.log(user);
+  const token = jwt.sign({ id: user.id }, "mySecretKey", {
+    expiresIn: "24h",
+  });
+
+  user.token = token;
+
+  console.log(token);
 };
 
 exports.deleteUser = async (req, res) => {
