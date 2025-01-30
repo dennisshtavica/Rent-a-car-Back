@@ -145,6 +145,7 @@ exports.getCategories = async (req, res) => {
 };
 
 
+
 exports.deleteCars = async (req, res) => {
   try {
     const carId = req.params.id;
@@ -215,7 +216,6 @@ exports.getOneCar = (req, res) => {
       });
 };
 
-//new added to get distinct car brands
 exports.getCarBrands = (req, res) => {
   Cars.distinct("name")
       .then((carBrands) => {
@@ -227,7 +227,6 @@ exports.getCarBrands = (req, res) => {
       });
 };
 
-// new added to get models for a specific car brand
 exports.getCarModels = (req, res) => {
   const { brand } = req.params;
 
@@ -265,3 +264,5 @@ exports.deleteCar = async (req, res) => {
     });
   }
 };
+
+

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const carsController = require("../controllers/carsController")
 const bookingsController = require('../controllers/bookingsController')
 const { authJwt, multerMiddleware } = require("../middlewares/index");
-const express = require('express');
 
 module.exports = (app) => {
     router.post("/addCar", [authJwt.verifyToken], multerMiddleware.upload.single("image"), carsController.addCar);
@@ -10,7 +9,7 @@ module.exports = (app) => {
     router.get("/getCars", [authJwt.verifyToken], carsController.getCars);
     router.get("/search-results/:carBrand/:carModel", [authJwt.verifyToken], carsController.searchCars);
     router.get("/bookingPage/:id", [authJwt.verifyToken], carsController.getOneCar);
-    router.post("/create-checkout-session", bookingsController.createPaymentIntent);
+    router.post("/create-checkout-session", bookingsController.createPaymentIntent)
     //new routes for getting car brands and models
     router.get("/getCarBrands", [authJwt.verifyToken], carsController.getCarBrands);
     router.get("/getCarModels/:brand", [authJwt.verifyToken], carsController.getCarModels);
@@ -30,6 +29,8 @@ module.exports = (app) => {
     router.get("/features", [authJwt.verifyToken], carsController.getFeatures);
     router.get("/categories", [authJwt.verifyToken], carsController.getCategories);
     router.delete("/cars/:id", [authJwt.verifyToken], carsController.deleteCar);
+
+    
 
     app.use(router);
 };

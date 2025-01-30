@@ -52,7 +52,7 @@ const mongodbConn = require("./db/mongodb");
 require("./routes/userRoutes")(app)
 require("./routes/carRoutes")(app)
 require("./routes/reviewsRoutes")(app)
-
+require("./routes/maintenanceRoutes")(app)
 
 app.get("/", (req, res) => {
     res.json({ message: "Hi there" });
