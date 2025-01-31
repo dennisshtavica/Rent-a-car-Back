@@ -53,6 +53,7 @@ require("./routes/userRoutes")(app)
 require("./routes/carRoutes")(app)
 require("./routes/reviewsRoutes")(app)
 require("./routes/maintenanceRoutes")(app)
+require("./routes/driverVerificationRoutes")(app)
 
 app.get("/", (req, res) => {
     res.json({ message: "Hi there" });
