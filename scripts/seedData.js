@@ -29,20 +29,14 @@ const categories = [
 
 const seedDatabase = async () => {
     try {
-        // Connect to MongoDB
         await mongoose.connect(MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
-        console.log('Connected to MongoDB');
 
-        // Clear existing data
         await CarFeatures.deleteMany({});
         await CarCategory.deleteMany({});
-        console.log('Cleared existing data');
 
-        // Insert new data
-        // Using insertMany with ordered: false to continue even if some documents fail due to duplicates
         const insertedFeatures = await CarFeatures.insertMany(features, { ordered: false })
             .catch(error => {
                 console.log('Some features may already exist:', error.message);
@@ -55,24 +49,20 @@ const seedDatabase = async () => {
                 return error.insertedDocs || [];
             });
 
-        console.log(`Inserted/Updated ${insertedFeatures.length} features`);
-        console.log(`Inserted/Updated ${insertedCategories.length} categories`);
-        console.log('Database seeded successfully!');
 
-        // Log the current state of the collections
+
         const totalFeatures = await CarFeatures.countDocuments();
         const totalCategories = await CarCategory.countDocuments();
-        console.log(`Total features in database: ${totalFeatures}`);
-        console.log(`Total categories in database: ${totalCategories}`);
+
 
     } catch (error) {
         console.error('Error seeding database:', error);
     } finally {
-        // Close the connection
+
         await mongoose.connection.close();
         console.log('Database connection closed');
     }
 };
 
-// Run the seed function
+
 seedDatabase();

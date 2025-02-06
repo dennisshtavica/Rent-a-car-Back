@@ -31,7 +31,7 @@ const Bookings = mongoose.Schema({
     email: { type: String, required: true },
     phone_number: { type: String, required: true },
 }, {
-    timestamps: true // Add timestamps for createdAt and updatedAt
+    timestamps: true 
 });
 
 module.exports = mongoose.model("Bookings", Bookings, 'bookings');

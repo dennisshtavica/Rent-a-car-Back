@@ -10,10 +10,8 @@ const Payment = require("../models/mongodb/payments");
 
 exports.getAllBookings = async (req, res) => {
   try {
-      console.log('1. Starting getAllBookings');
       
       const bookings = await Bookings.find({}).lean();
-      console.log('2. Found bookings:', bookings); 
 
       if (!bookings || bookings.length === 0) {
           return res.status(200).json([]);

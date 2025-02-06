@@ -11,8 +11,6 @@ const addReview = async (req, res) => {
             });
         }
 
-        console.log('Starting review addition...');
-        console.log('Request body:', req.body);
 
         const { userId, username, rating, comment } = req.body;
 
@@ -31,7 +29,6 @@ const addReview = async (req, res) => {
             comment: comment.trim()
         });
 
-        console.log('Attempting to save review:', newReview);
 
         const savedReview = await newReview.save();
 
@@ -43,7 +40,6 @@ const addReview = async (req, res) => {
             });
         }
 
-        console.log('Review saved successfully:', savedReview);
 
         return res.status(201).json({
             success: true,
@@ -69,15 +65,13 @@ const addReview = async (req, res) => {
 
 const getReviews = async (req, res) => {
     try {
-        console.log('Fetching reviews from database...');
         const reviews = await Review.find()
             .sort({ createdAt: -1 }); 
         
-        console.log('Retrieved reviews:', reviews);  // Add this log
         
         res.status(200).json({
             success: true,
-            reviews: reviews  // Make sure we're sending the reviews array
+            reviews: reviews  
         });
      } catch (error) {
         console.error('Error in getReviews:', error);

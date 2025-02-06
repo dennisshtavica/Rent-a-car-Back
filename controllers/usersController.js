@@ -49,14 +49,12 @@ exports.signup = async (req, res) => {
       console.log(`Error creating user: ${err.message}`);
     });
 
-  console.log(user);
   const token = jwt.sign({ id: user.id }, "mySecretKey", {
     expiresIn: "24h",
   });
 
   user.token = token;
 
-  console.log(token);
 };
 
 
@@ -254,14 +252,12 @@ exports.createUser = async (req, res) => {
       console.log(`Error creating user: ${err.message}`);
     });
 
-  console.log(user);
   const token = jwt.sign({ id: user.id }, "mySecretKey", {
     expiresIn: "24h",
   });
 
   user.token = token;
 
-  console.log(token);
 };
 
 exports.deleteUser = async (req, res) => {

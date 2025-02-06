@@ -6,8 +6,6 @@ const CarFeatures = require("../models/mongodb/car_features");
 
 exports.addCar = async (req, res) => {
   try {
-    console.log('Received request body:', req.body);
-    console.log('Received file:', req.file);
 
     const carFeatures = req.body.car_features || [];
     const features = Array.isArray(carFeatures) ? carFeatures : [carFeatures];
@@ -39,10 +37,8 @@ exports.addCar = async (req, res) => {
       car_category: req.body.car_category
     });
 
-    console.log('Attempting to save car:', newCar);
 
     const savedCar = await newCar.save();
-    console.log('Car saved successfully:', savedCar);
 
     const populatedCar = await Cars.findById(savedCar._id)
       .populate('car_features')
@@ -64,13 +60,11 @@ exports.addCar = async (req, res) => {
 
 exports.updateCar = async (req, res) => {
   try {
-    console.log('Update request for car:', req.params.id);
     
     const carId = req.params.id;
     
     // Parse the JSON data from the FormData
     const jsonData = JSON.parse(req.body.data);
-    console.log('Received update data:', jsonData);
 
     const updateData = {
       brand: jsonData.brand,
@@ -89,7 +83,6 @@ exports.updateCar = async (req, res) => {
       updateData.image = req.file.path;
     }
 
-    console.log('Final update data:', updateData);
 
     const updatedCar = await Cars.findByIdAndUpdate(
       carId,
